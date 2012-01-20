@@ -180,6 +180,22 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
  */(function(a,b){var c=5;a.widget("ui.slider",a.ui.mouse,{widgetEventPrefix:"slide",options:{animate:!1,distance:0,max:100,min:0,orientation:"horizontal",range:!1,step:1,value:0,values:null},_create:function(){var b=this,d=this.options,e=this.element.find(".ui-slider-handle").addClass("ui-state-default ui-corner-all"),f="<a class='ui-slider-handle ui-state-default ui-corner-all' href='#'></a>",g=d.values&&d.values.length||1,h=[];this._keySliding=!1,this._mouseSliding=!1,this._animateOff=!0,this._handleIndex=null,this._detectOrientation(),this._mouseInit(),this.element.addClass("ui-slider ui-slider-"+this.orientation+" ui-widget"+" ui-widget-content"+" ui-corner-all"+(d.disabled?" ui-slider-disabled ui-disabled":"")),this.range=a([]),d.range&&(d.range===!0&&(d.values||(d.values=[this._valueMin(),this._valueMin()]),d.values.length&&d.values.length!==2&&(d.values=[d.values[0],d.values[0]])),this.range=a("<div></div>").appendTo(this.element).addClass("ui-slider-range ui-widget-header"+(d.range==="min"||d.range==="max"?" ui-slider-range-"+d.range:"")));for(var i=e.length;i<g;i+=1)h.push(f);this.handles=e.add(a(h.join("")).appendTo(b.element)),this.handle=this.handles.eq(0),this.handles.add(this.range).filter("a").click(function(a){a.preventDefault()}).hover(function(){d.disabled||a(this).addClass("ui-state-hover")},function(){a(this).removeClass("ui-state-hover")}).focus(function(){d.disabled?a(this).blur():(a(".ui-slider .ui-state-focus").removeClass("ui-state-focus"),a(this).addClass("ui-state-focus"))}).blur(function(){a(this).removeClass("ui-state-focus")}),this.handles.each(function(b){a(this).data("index.ui-slider-handle",b)}),this.handles.keydown(function(d){var e=!0,f=a(this).data("index.ui-slider-handle"),g,h,i,j;if(!b.options.disabled){switch(d.keyCode){case a.ui.keyCode.HOME:case a.ui.keyCode.END:case a.ui.keyCode.PAGE_UP:case a.ui.keyCode.PAGE_DOWN:case a.ui.keyCode.UP:case a.ui.keyCode.RIGHT:case a.ui.keyCode.DOWN:case a.ui.keyCode.LEFT:e=!1;if(!b._keySliding){b._keySliding=!0,a(this).addClass("ui-state-active"),g=b._start(d,f);if(g===!1)return}}j=b.options.step,b.options.values&&b.options.values.length?h=i=b.values(f):h=i=b.value();switch(d.keyCode){case a.ui.keyCode.HOME:i=b._valueMin();break;case a.ui.keyCode.END:i=b._valueMax();break;case a.ui.keyCode.PAGE_UP:i=b._trimAlignValue(h+(b._valueMax()-b._valueMin())/c);break;case a.ui.keyCode.PAGE_DOWN:i=b._trimAlignValue(h-(b._valueMax()-b._valueMin())/c);break;case a.ui.keyCode.UP:case a.ui.keyCode.RIGHT:if(h===b._valueMax())return;i=b._trimAlignValue(h+j);break;case a.ui.keyCode.DOWN:case a.ui.keyCode.LEFT:if(h===b._valueMin())return;i=b._trimAlignValue(h-j)}b._slide(d,f,i);return e}}).keyup(function(c){var d=a(this).data("index.ui-slider-handle");b._keySliding&&(b._keySliding=!1,b._stop(c,d),b._change(c,d),a(this).removeClass("ui-state-active"))}),this._refreshValue(),this._animateOff=!1},destroy:function(){this.handles.remove(),this.range.remove(),this.element.removeClass("ui-slider ui-slider-horizontal ui-slider-vertical ui-slider-disabled ui-widget ui-widget-content ui-corner-all").removeData("slider").unbind(".slider"),this._mouseDestroy();return this},_mouseCapture:function(b){var c=this.options,d,e,f,g,h,i,j,k,l;if(c.disabled)return!1;this.elementSize={width:this.element.outerWidth(),height:this.element.outerHeight()},this.elementOffset=this.element.offset(),d={x:b.pageX,y:b.pageY},e=this._normValueFromMouse(d),f=this._valueMax()-this._valueMin()+1,h=this,this.handles.each(function(b){var c=Math.abs(e-h.values(b));f>c&&(f=c,g=a(this),i=b)}),c.range===!0&&this.values(1)===c.min&&(i+=1,g=a(this.handles[i])),j=this._start(b,i);if(j===!1)return!1;this._mouseSliding=!0,h._handleIndex=i,g.addClass("ui-state-active").focus(),k=g.offset(),l=!a(b.target).parents().andSelf().is(".ui-slider-handle"),this._clickOffset=l?{left:0,top:0}:{left:b.pageX-k.left-g.width()/2,top:b.pageY-k.top-g.height()/2-(parseInt(g.css("borderTopWidth"),10)||0)-(parseInt(g.css("borderBottomWidth"),10)||0)+(parseInt(g.css("marginTop"),10)||0)},this.handles.hasClass("ui-state-hover")||this._slide(b,i,e),this._animateOff=!0;return!0},_mouseStart:function(a){return!0},_mouseDrag:function(a){var b={x:a.pageX,y:a.pageY},c=this._normValueFromMouse(b);this._slide(a,this._handleIndex,c);return!1},_mouseStop:function(a){this.handles.removeClass("ui-state-active"),this._mouseSliding=!1,this._stop(a,this._handleIndex),this._change(a,this._handleIndex),this._handleIndex=null,this._clickOffset=null,this._animateOff=!1;return!1},_detectOrientation:function(){this.orientation=this.options.orientation==="vertical"?"vertical":"horizontal"},_normValueFromMouse:function(a){var b,c,d,e,f;this.orientation==="horizontal"?(b=this.elementSize.width,c=a.x-this.elementOffset.left-(this._clickOffset?this._clickOffset.left:0)):(b=this.elementSize.height,c=a.y-this.elementOffset.top-(this._clickOffset?this._clickOffset.top:0)),d=c/b,d>1&&(d=1),d<0&&(d=0),this.orientation==="vertical"&&(d=1-d),e=this._valueMax()-this._valueMin(),f=this._valueMin()+d*e;return this._trimAlignValue(f)},_start:function(a,b){var c={handle:this.handles[b],value:this.value()};this.options.values&&this.options.values.length&&(c.value=this.values(b),c.values=this.values());return this._trigger("start",a,c)},_slide:function(a,b,c){var d,e,f;this.options.values&&this.options.values.length?(d=this.values(b?0:1),this.options.values.length===2&&this.options.range===!0&&(b===0&&c>d||b===1&&c<d)&&(c=d),c!==this.values(b)&&(e=this.values(),e[b]=c,f=this._trigger("slide",a,{handle:this.handles[b],value:c,values:e}),d=this.values(b?0:1),f!==!1&&this.values(b,c,!0))):c!==this.value()&&(f=this._trigger("slide",a,{handle:this.handles[b],value:c}),f!==!1&&this.value(c))},_stop:function(a,b){var c={handle:this.handles[b],value:this.value()};this.options.values&&this.options.values.length&&(c.value=this.values(b),c.values=this.values()),this._trigger("stop",a,c)},_change:function(a,b){if(!this._keySliding&&!this._mouseSliding){var c={handle:this.handles[b],value:this.value()};this.options.values&&this.options.values.length&&(c.value=this.values(b),c.values=this.values()),this._trigger("change",a,c)}},value:function(a){if(arguments.length)this.options.value=this._trimAlignValue(a),this._refreshValue(),this._change(null,0);else return this._value()},values:function(b,c){var d,e,f;if(arguments.length>1)this.options.values[b]=this._trimAlignValue(c),this._refreshValue(),this._change(null,b);else{if(!arguments.length)return this._values();if(!a.isArray(arguments[0]))return this.options.values&&this.options.values.length?this._values(b):this.value();d=this.options.values,e=arguments[0];for(f=0;f<d.length;f+=1)d[f]=this._trimAlignValue(e[f]),this._change(null,f);this._refreshValue()}},_setOption:function(b,c){var d,e=0;a.isArray(this.options.values)&&(e=this.options.values.length),a.Widget.prototype._setOption.apply(this,arguments);switch(b){case"disabled":c?(this.handles.filter(".ui-state-focus").blur(),this.handles.removeClass("ui-state-hover"),this.handles.propAttr("disabled",!0),this.element.addClass("ui-disabled")):(this.handles.propAttr("disabled",!1),this.element.removeClass("ui-disabled"));break;case"orientation":this._detectOrientation(),this.element.removeClass("ui-slider-horizontal ui-slider-vertical").addClass("ui-slider-"+this.orientation),this._refreshValue();break;case"value":this._animateOff=!0,this._refreshValue(),this._change(null,0),this._animateOff=!1;break;case"values":this._animateOff=!0,this._refreshValue();for(d=0;d<e;d+=1)this._change(null,d);this._animateOff=!1}},_value:function(){var a=this.options.value;a=this._trimAlignValue(a);return a},_values:function(a){var b,c,d;if(arguments.length){b=this.options.values[a],b=this._trimAlignValue(b);return b}c=this.options.values.slice();for(d=0;d<c.length;d+=1)c[d]=this._trimAlignValue(c[d]);return c},_trimAlignValue:function(a){if(a<=this._valueMin())return this._valueMin();if(a>=this._valueMax())return this._valueMax();var b=this.options.step>0?this.options.step:1,c=(a-this._valueMin())%b,d=a-c;Math.abs(c)*2>=b&&(d+=c>0?b:-b);return parseFloat(d.toFixed(5))},_valueMin:function(){return this.options.min},_valueMax:function(){return this.options.max},_refreshValue:function(){var b=this.options.range,c=this.options,d=this,e=this._animateOff?!1:c.animate,f,g={},h,i,j,k;this.options.values&&this.options.values.length?this.handles.each(function(b,i){f=(d.values(b)-d._valueMin())/(d._valueMax()-d._valueMin())*100,g[d.orientation==="horizontal"?"left":"bottom"]=f+"%",a(this).stop(1,1)[e?"animate":"css"](g,c.animate),d.options.range===!0&&(d.orientation==="horizontal"?(b===0&&d.range.stop(1,1)[e?"animate":"css"]({left:f+"%"},c.animate),b===1&&d.range[e?"animate":"css"]({width:f-h+"%"},{queue:!1,duration:c.animate})):(b===0&&d.range.stop(1,1)[e?"animate":"css"]({bottom:f+"%"},c.animate),b===1&&d.range[e?"animate":"css"]({height:f-h+"%"},{queue:!1,duration:c.animate}))),h=f}):(i=this.value(),j=this._valueMin(),k=this._valueMax(),f=k!==j?(i-j)/(k-j)*100:0,g[d.orientation==="horizontal"?"left":"bottom"]=f+"%",this.handle.stop(1,1)[e?"animate":"css"](g,c.animate),b==="min"&&this.orientation==="horizontal"&&this.range.stop(1,1)[e?"animate":"css"]({width:f+"%"},c.animate),b==="max"&&this.orientation==="horizontal"&&this.range[e?"animate":"css"]({width:100-f+"%"},{queue:!1,duration:c.animate}),b==="min"&&this.orientation==="vertical"&&this.range.stop(1,1)[e?"animate":"css"]({height:f+"%"},c.animate),b==="max"&&this.orientation==="vertical"&&this.range[e?"animate":"css"]({height:100-f+"%"},{queue:!1,duration:c.animate}))}}),a.extend(a.ui.slider,{version:"1.8.17"})})(jQuery);
 
 
+/* jQuery UI Progressbar 1.8.17
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Progressbar
+ *
+ * Depends:
+ *   jquery.ui.core.js
+ *   jquery.ui.widget.js
+ */(function(a,b){a.widget("ui.progressbar",{options:{value:0,max:100},min:0,_create:function(){this.element.addClass("ui-progressbar ui-widget ui-widget-content ui-corner-all").attr({role:"progressbar","aria-valuemin":this.min,"aria-valuemax":this.options.max,"aria-valuenow":this._value()}),this.valueDiv=a("<div class='ui-progressbar-value ui-widget-header ui-corner-left'></div>").appendTo(this.element),this.oldValue=this._value(),this._refreshValue()},destroy:function(){this.element.removeClass("ui-progressbar ui-widget ui-widget-content ui-corner-all").removeAttr("role").removeAttr("aria-valuemin").removeAttr("aria-valuemax").removeAttr("aria-valuenow"),this.valueDiv.remove(),a.Widget.prototype.destroy.apply(this,arguments)},value:function(a){if(a===b)return this._value();this._setOption("value",a);return this},_setOption:function(b,c){b==="value"&&(this.options.value=c,this._refreshValue(),this._value()===this.options.max&&this._trigger("complete")),a.Widget.prototype._setOption.apply(this,arguments)},_value:function(){var a=this.options.value;typeof a!="number"&&(a=0);return Math.min(this.options.max,Math.max(this.min,a))},_percentage:function(){return 100*this._value()/this.options.max},_refreshValue:function(){var a=this.value(),b=this._percentage();this.oldValue!==a&&(this.oldValue=a,this._trigger("change")),this.valueDiv.toggle(a>this.min).toggleClass("ui-corner-right",a===this.options.max).width(b.toFixed(0)+"%"),this.element.attr("aria-valuenow",a)}}),a.extend(a.ui.progressbar,{version:"1.8.17"})})(jQuery);
+
+
+
+
 			/* Remedial Javascript
 			 * http://javascript.crockford.com/remedial.html
 			 */
@@ -197,6 +213,11 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 			    return s;
 			}
 
+
+			// Save IE from itself
+			if (!console || typeOf(console.debug) !== 'function') {
+				var console = {debug:function(){}};
+			}
 
 
 
@@ -303,14 +324,28 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 						nonWeapon: 0,
 						cannon: 1,
 						missile: 2
+					},
+					Races: {
+						Terran:0,
+						Eridani:1,
+						Hydran:2,
+						Planta:3,
+						Draco:4,
+						Mechanema:5,
+						Hegemony:6
 					}					
 				};
 
 			})();
 
 			var Classes = (function() {
-				// Superclasses
+				// This is somewhat more complicated than it started out as due to 
+				// interdependencies between classes...I probably wouldn't do it this
+				// way again. My apologies for the tricky navigation required to get
+				// through the code.
 
+
+				// Some miscellaneous superclasses
 
 				var Module = Class.extend({
 					init: function() {},
@@ -335,170 +370,11 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 						this.moduleType = Enums.ModuleTypes.cannon;
 					}
 				});
-		
-				var Ship = Class.extend({
-					init: function(shipName, modules, startingEnergy, startingInitiative, isMobile) {
-						this.shipName = shipName;
-						this.modules = (typeOf(modules) === 'array' ? modules : (typeOf(modules) === 'number' ? new Array(modules) : []));
-						this.startingEnergy = startingEnergy;
-						this.startingInitiative = startingInitiative;
-						this.isMobile = isMobile;
-					},
-					shipName: '',
-					// Array of Slot objects
-					modules: [],
-					// Specifies the graphical layout of the modules.
-					// Each slot is considered to be a 2x2 square.
-					// Position 0,0 is the top left.
-					// The layout property is an array of points, indexed
-					// on this.modules, indicating
-					// the x,y coords of the top left corner of that slot.
-					layout:[],
-					startingEnergy: 0,
-					startingInitiative: 0,
-					isMobile: true, // true for all starships, false for starbase
-					
-					// Checks the configured layout to see if it is allowable.
-					// This function returns an array of strings representing
-					// error messages; if the array is empty then the layout
-					// is valid.
-					getLayoutValidationErrors: function() {
-						var errors = [];
-						var hasDrive = false;
-						var powerUsage = 0;
-						var powerProduction = 0;
-						for (q in this.modules) {
-							hasDrive = hasDrive || this.modules[q].module.move > 0;
-							powerUsage += this.modules[q].module.powerRequired;
-							powerProduction += this.modules[q].module.powerGenerated;
-						}
 
-						// Tally power usage vs power sources
-						if (powerUsage > powerProduction) {
-							errors.push('Power consumption exceeds power production!');
-						}
 
-						// Ensure mobile ships have a drive
-						if (this.isMobile && !hasDrive) {
-							errors.push('Starships must have at least one drive.');
-						}
-
-						// Ensure starbases do not have a drive
-						if (!this.isMobile && hasDrive) {
-							errors.push('Starbases cannot have drives.');
-						}
-
-						return errors;
-					},
-
-					// Generates HTML to display the current ship module layout
-					html: function() {
-						function dragify(el, cssClasses) {
-							return $(el).draggable({
-								containment:'window',
-								zIndex: 11,
-								start:function(event, ui) {
-									// Put a blank module into its place.
-									var c = $(ui.helper).data('moduleKlass');
-									$(ui.helper).closest('div.blueprint').append(
-										dropify($('<div></div>')
-												.addClass(ui.helper.attr('class'))
-												.removeClass(new c().klassName)
-												.data('moduleKlass', Classes.Blank)
-												.addClass('Blank'),
-											cssClasses
-										)		
-									);
-									//$(this).remove();
-								},
-								stop: function(event, ui) {
-									$(this).remove();
-
-								}
-							}).removeAttr('style'); // draggable tacks on positioning we don't want
-						};
-
-						function dropify(el, cssClasses) {
-							return $(el).droppable({
-										accept:'.module',
-										drop: function(event,ui) {
-											console.debug(event, ui);
-											console.debug(cssClasses);
-											console.debug(this);
-											var klass = ui.draggable.data('moduleKlass');
-											var newModule = dropify(
-												dragify(
-													$('<div></div>')
-														.addClass(cssClasses)
-														.addClass(new klass().klassName)
-														.data('moduleKlass', klass)
-														.appendTo(ret), 
-													cssClasses
-												),
-												cssClasses
-											);				
-											// TODO: newModule needs to be a
-											// draggable that restores the
-											// default module to its slot
-											// whenever it's dropped outside
-											// the ship.
-
-											$(this).remove();
-										}
-									});
-						};
-
-						var ret = $('<div></div>').addClass('blueprint');
-						var classes = '';
-
-						for (var i = 0; i < this.layout.length; i++) {
-							var classes = ['module', 'slot_'+i, 'x'+this.layout[i].x, 'y'+this.layout[i].y].join(' ');
-							ret.append(dragify(
-								dropify(
-									$('<div></div>')
-										.addClass(classes)
-										.addClass(this.modules[i].klassName)					
-										.data('moduleKlass', this.modules[i].constructor),
-									classes
-								),
-								classes
-							));
-						}
-
-						return ret;
-					},
-
-					// Calculates the ship's current initiative value
-					// based on inherent initiative + modules
-					initiative: function() {
-						var init = this.startingInitiative;
-						for (var i = 0; i < this.modules.length; i++) {
-							init += (this.modules[i] || {initiative:0}).initiative;
-						}
-						return init;
-					},
-
-					computers: function() {
-						var bonus = 0;
-						$.each(this.modules, function(i, x) { bonus += (x || {hitModifier:0}).hitModifier; });
-						return bonus;
-					},
-
-					shields: function() {
-						var shields = 0;
-						$.each(this.modules, function(i, x) { shields += (x || {shield:0}).shield; });
-						return shields;
-					},
-
-					hull: function() {
-						var hull = 0;
-						$.each(this.modules, function(i, x) { hull += (x || {hull:0}).hull; });
-						return hull;
-					}
-
-				});
-
-				return {
+				// This is the object that will ultimately be returned and represent
+				// this Classes namespace.
+				var classes = {
 		
 
 					Slot: Class.extend({
@@ -797,52 +673,58 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 						},
 						klassName: 'IonTurret',
 						moduleName: 'Ion Turret'
-					}),
+					})
+				}
 
 
-					// ####################
-					// Ship Definitions
-					// ####################
 
-					Interceptor: Ship.extend({
-						init: function(modules) {
-							if (typeOf(modules) != 'array' || modules.length != 4) {
-								throw 'Interceptors must have 4 module modules.';
-							}
-							this._super('Interceptor', modules, 0, 2, true);
-							this.layout = [
-								{x:0,y:1},
-								{x:2,y:0},
-								{x:2,y:2},
-								{x:4,y:1}
-							]
-						}
-					}),
 
-					Cruiser: Ship.extend({
-						init: function(modules) {
-							if (typeOf(modules) != 'array' || modules.length != 6) {
-								throw 'Cruisers must have 6 module slots.';
-							}
-							this._super('Cruiser', modules, 0, 1, true);
-							this.layout = [
-								{x:0,y:1},
+				// Defines the ship blueprint layouts - the default (Terran) and
+				// any differences by race.
+				// Note that classes are referred to by "classes" as we are dealing with the
+				// to-be-returned Classes object.
+				var _shipConfig = {
+					default: {
+						interceptor: {
+							layout: [
 								{x:0,y:3},
-								{x:2,y:0},
 								{x:2,y:2},
-								{x:4,y:1},
+								{x:2,y:4},
 								{x:4,y:3}
-							];
-						}
-					}),
-
-					Dreadnought: Ship.extend({
-						init: function(modules) {
-							if (typeOf(modules) != 'array' || modules.length != 8) {
-								throw 'Dreadnoughts must have 8 module slots.';
-							}
-							this._super('Dreadnought', modules, 0, 0, true);
-							this.layout = [
+							],
+							blueprint: [
+								classes.Blank,
+								classes.IonCannon,
+								classes.NuclearSource,
+								classes.NuclearDrive					
+							],
+							power: 0,
+							initiative: 2,
+							computers: 0
+						},
+						cruiser: {
+							layout: [
+								{x:0,y:2},
+								{x:0,y:4},
+								{x:2,y:1},
+								{x:2,y:3},
+								{x:4,y:2},
+								{x:4,y:4}
+							],
+							blueprint: [
+								classes.Hull,
+								classes.Blank,
+								classes.IonCannon,
+								classes.NuclearSource,
+								classes.ElectronComputer,
+								classes.NuclearDrive
+							],
+							power: 0,
+							initiative: 1,
+							computers: 0
+						},
+						dreadnought: {
+							layout: [
 								{x:0,y:0},
 								{x:0,y:2},
 								{x:0,y:4},
@@ -851,23 +733,386 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 								{x:4,y:0},
 								{x:4,y:2},
 								{x:4,y:4}
-							];
-						}
-					}),
-
-					Starbase: Ship.extend({
-						init: function(modules) {
-							if (typeOf(modules) != 'array' || modules.length != 5) {
-								throw 'Starbases must have 5 module slots.';
-							}
-							this._super('Starbase', modules, 3, 4, false);
-							this.layout = [
+							],
+							blueprint: [
+								classes.IonCannon,
+								classes.Hull,
+								classes.Blank,
+								classes.Hull,
+								classes.NuclearSource,
+								classes.IonCannon,
+								classes.ElectronComputer,
+								classes.NuclearDrive
+							],
+							power: 0,
+							initiative: 0,
+							computers: 0
+						},
+						starbase: {
+							layout: [
 								{x:0,y:2},
 								{x:2,y:0},
 								{x:2,y:2},
 								{x:2,y:4},
 								{x:4,y:2}
-							];
+							],
+							blueprint: [
+								classes.Hull,
+								classes.IonCannon,
+								classes.Hull,
+								classes.Blank,
+								classes.ElectronComputer
+							],
+							power: 3,
+							initiative: 4,
+							computers: 0
+						}
+					},
+					Terran: {},
+					Eridani: { 
+						dreadnought: {
+							power: 1
+						}
+					},
+					Hydran: {},
+					Planta: {
+						interceptor: {
+							layout: [
+								{x:2,y:2},
+								{x:2,y:4},
+								{x:4,y:3}
+							],
+							blueprint: [
+								classes.IonCannon,
+								classes.NuclearSource,
+								classes.NuclearDrive
+							],
+							power: 2,
+							initiative: 0,
+							computers: 1
+						},
+						cruiser: {
+							layout: [
+								{x:0,y:2},
+								{x:2,y:1},
+								{x:2,y:3},
+								{x:4,y:2},
+								{x:4,y:4}
+							],
+							blueprint: [
+								classes.Hull,
+								classes.IonCannon,
+								classes.NuclearSource,
+								classes.Blank,
+								classes.NuclearDrive
+							],
+							power: 2,
+							initiative: 0,
+							computers: 1
+						},
+						dreadnought: {
+							layout: [
+								{x:0,y:0},
+								{x:0,y:2},
+								{x:0,y:4},
+								{x:2,y:1},
+								{x:4,y:0},
+								{x:4,y:2},
+								{x:4,y:4}
+							],
+							blueprint: [
+								classes.IonCannon,
+								classes.Hull,
+								classes.Hull,
+								classes.NuclearSource,
+								classes.IonCannon,
+								classes.Blank,
+								classes.NuclearDrive
+							],
+							power: 2,
+							initiative: 0,
+							computers: 1
+						},
+						starbase: {
+							layout: [
+								{x:0,y:2},
+								{x:2,y:0},
+								{x:2,y:2},
+								{x:4,y:2}
+							],
+							blueprint: [
+								classes.Hull,
+								classes.IonCannon,
+								classes.Hull,
+								classes.ElectronComputer
+							],
+							power: 5,
+							initiative: 2,
+							computers: 1
+						}
+					},
+					Draco: {},
+					Mechanema: {},
+					Hegemony: {
+						interceptor: {
+							blueprint: [
+								classes.GaussShield,
+								classes.IonCannon,
+								classes.NuclearSource,
+								classes.NuclearDrive
+							],
+							power: 1,
+							initiative: 3
+						},
+						cruiser: {
+							blueprint: [
+								classes.Hull,
+								classes.GaussShield,
+								classes.IonCannon,
+								classes.NuclearSource,
+								classes.ElectronComputer,
+								classes.NuclearDrive
+							],
+							power: 2,
+							initative: 2
+						},
+						dreadnought: {
+							blueprint: [
+								classes.IonCannon,
+								classes.Hull,
+								classes.GaussShield,
+								classes.Hull,
+								classes.NuclearSource,
+								classes.IonCannon,
+								classes.ElectronComputer,
+								classes.NuclearDrive
+							],
+							power: 3,
+							initiative: 1
+						},
+						starbase: {
+							blueprint: [
+								classes.Hull,
+								classes.IonCannon,
+								classes.Hull,
+								classes.GaussShield,
+								classes.ElectronComputer
+							],
+							power: 3,
+							initiative: 5
+						}
+					}
+				};
+		
+				var Ship = Class.extend({
+					init: function(shipName, modules, isMobile, race) {
+						if (race === undefined) {
+							throw 'ArgumentNullException';
+						}
+
+						var shipNameLower = shipName.toLowerCase();
+						var raceConfig = (Enums.Races[race] && _shipConfig[race][shipNameLower]) || {};
+				
+						this.shipName = shipName;
+						// Ensure that we have some instantiated modules.
+						// Callees can pass an array of modules here (they must be instantiated),
+						// or if no modules are passed, this constructor will instantiate an
+						// array of default modules based on the race selected.
+						this.modules = (typeOf(modules) === 'array' && modules.length > 0
+										? modules 
+										: (function(bp) { 
+												var r = []; 
+												for (var i = 0; i < bp.length; i++) {
+													var c = bp[i];
+													r.push(new c());
+												}
+												return r;
+											})((raceConfig.blueprint || _shipConfig.default[shipNameLower].blueprint)));
+
+						this.startingEnergy = raceConfig.power || _shipConfig.default[shipNameLower].power;
+						this.startingInitiative = raceConfig.initiative || _shipConfig.default[shipNameLower].initiative;
+						this.startingComputers = raceConfig.computers || _shipConfig.default[shipNameLower].computers;
+
+						this.isMobile = isMobile;
+						this.layout = raceConfig.layout || _shipConfig.default[shipNameLower].layout;
+					},
+					shipName: '',
+					// Array of Slot objects
+					modules: [],
+					// Specifies the graphical layout of the modules.
+					// Each slot is considered to be a 2x2 square.
+					// Position 0,0 is the top left.
+					// The layout property is an array of points, indexed
+					// on this.modules, indicating
+					// the x,y coords of the top left corner of that slot.
+					layout:[],
+					startingEnergy: 0,
+					startingInitiative: 0,
+					isMobile: true, // true for all starships, false for starbase
+					
+					// Checks the configured layout to see if it is allowable.
+					// This function returns an array of strings representing
+					// error messages; if the array is empty then the layout
+					// is valid.
+					getLayoutValidationErrors: function() {
+						var errors = [];
+						var hasDrive = false;
+						var powerUsage = 0;
+						var powerProduction = 0;
+						for (q in this.modules) {
+							hasDrive = hasDrive || this.modules[q].module.move > 0;
+							powerUsage += this.modules[q].module.powerRequired;
+							powerProduction += this.modules[q].module.powerGenerated;
+						}
+
+						// Tally power usage vs power sources
+						if (powerUsage > powerProduction) {
+							errors.push('Power consumption exceeds power production!');
+						}
+
+						// Ensure mobile ships have a drive
+						if (this.isMobile && !hasDrive) {
+							errors.push('Starships must have at least one drive.');
+						}
+
+						// Ensure starbases do not have a drive
+						if (!this.isMobile && hasDrive) {
+							errors.push('Starbases cannot have drives.');
+						}
+
+						return errors;
+					},
+
+					// Generates HTML to display the current ship module layout
+					html: function() {
+						function dragify(el, cssClasses) {
+							return $(el).draggable({
+								containment:'window',
+								zIndex: 11,
+								start:function(event, ui) {
+									// Put a blank module into its place.
+									var c = $(ui.helper).data('moduleKlass');
+									$(ui.helper).closest('div.blueprint').append(
+										dropify($('<div></div>')
+												.addClass(ui.helper.attr('class'))
+												.removeClass(new c().klassName)
+												.data('moduleKlass', Classes.Blank)
+												.addClass('Blank'),
+											cssClasses
+										)		
+									);
+									//$(this).remove();
+								},
+								stop: function(event, ui) {
+									$(this).remove();
+
+								}
+							}).removeAttr('style'); // draggable tacks on positioning we don't want
+						};
+
+						function dropify(el, cssClasses) {
+							return $(el).droppable({
+										accept:'.module',
+										drop: function(event,ui) {
+											var klass = ui.draggable.data('moduleKlass');
+											var newModule = dropify(
+												dragify(
+													$('<div></div>')
+														.addClass(cssClasses)
+														.addClass(new klass().klassName)
+														.data('moduleKlass', klass)
+														.appendTo(ret), 
+													cssClasses
+												),
+												cssClasses
+											);				
+											// TODO: newModule needs to be a
+											// draggable that restores the
+											// default module to its slot
+											// whenever it's dropped outside
+											// the ship.
+
+											$(this).remove();
+										}
+									});
+						};
+
+						var ret = $('<div></div>').addClass('blueprint');
+						var classes = '';
+
+						for (var i = 0; i < this.layout.length; i++) {
+							var classes = ['module', 'slot_'+i, 'x'+this.layout[i].x, 'y'+this.layout[i].y].join(' ');
+							ret.append(dragify(
+								dropify(
+									$('<div></div>')
+										.addClass(classes)
+										.addClass(this.modules[i].klassName)					
+										.data('moduleKlass', this.modules[i].constructor),
+									classes
+								),
+								classes
+							));
+						}
+
+						return ret;
+					},
+
+					// Calculates the ship's current initiative value
+					// based on inherent initiative + modules
+					initiative: function() {
+						var init = this.startingInitiative;
+						for (var i = 0; i < this.modules.length; i++) {
+							init += (this.modules[i] || {initiative:0}).initiative;
+						}
+						return init;
+					},
+
+					computers: function() {
+						var bonus = (this.startingComputers || 0);
+						$.each(this.modules, function(i, x) { bonus += (x || {hitModifier:0}).hitModifier; });
+						return bonus;
+					},
+
+					shields: function() {
+						var shields = 0;
+						$.each(this.modules, function(i, x) { shields += (x || {shield:0}).shield; });
+						return shields;
+					},
+
+					hull: function() {
+						var hull = 0;
+						$.each(this.modules, function(i, x) { hull += (x || {hull:0}).hull; });
+						return hull;
+					}
+
+				});
+
+				var ships = {
+					// ####################
+					// Ship Definitions
+					// ####################
+
+					Interceptor: Ship.extend({
+						init: function(modules, race) {
+							this._super('Interceptor', modules, true, race);
+						}
+					}),
+
+					Cruiser: Ship.extend({
+						init: function(modules, race) {
+							this._super('Cruiser', modules, true, race);
+						}
+					}),
+
+					Dreadnought: Ship.extend({
+						init: function(modules, race) {
+							this._super('Dreadnought', modules, true, race);
+						}
+					}),
+
+					Starbase: Ship.extend({
+						init: function(modules, race) {
+							this._super('Starbase', modules, false, race);
 						}
 					}),
 
@@ -904,15 +1149,20 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 								], 4, 0, false
 							);
 						}
-					}),
+					})
+				};
 
 
-					// Stores a die roll, indicating the amount rolled
-					// and the quantity of damage it would do if it hits.
-					// This class also tracks the computer bonus of the ship
-					// that rolled the die, so that it can be properly
-					// allocated later.
-					DieRoll: Class.extend({
+				for (var attr in ships) {
+					classes[attr] = ships[attr];
+				}
+
+				// Stores a die roll, indicating the amount rolled
+				// and the quantity of damage it would do if it hits.
+				// This class also tracks the computer bonus of the ship
+				// that rolled the die, so that it can be properly
+				// allocated later.
+				classes.DieRoll = Class.extend({
 						init:function(roll, damage, computerBonus) {
 							this.roll = roll;
 							this.damage = damage || 0;
@@ -921,9 +1171,10 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 						roll: null,
 						damage: 0,
 						computerBonus: 0
-					})
+					});
 				
-				};
+
+				return classes;
 			})();  // Classes
 
 
@@ -947,6 +1198,7 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 
 			var simulator = (function() {
 
+				// TODO: Replace with global config object
 				var _defaultModules = {
 					interceptor: [
 						Classes.Blank,
@@ -1027,9 +1279,9 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 					}
 				};
 
-				var runId = -1;
+				var _runId = -1;
 				function _abortRun() {
-					clearInterval(runId);
+					clearInterval(_runId);
 				};
 
 				return {
@@ -1063,24 +1315,17 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 						throw 'NotImplementedException';
 					},
 
-					run: function(config) {
+					run: function(config, progressCallback, completedCallback) {
 						// First, abort any previous run
 						_abortRun();
 
 						// Set up some default values
-						var iterations = 100000;
-						var statusReporter = function(pct, msg) { };
+						config = config || {};
+						config.iterations = config.iterations || 3000;
+						config.chunkSize = config.chunkSize || 100;
 
-						// If config is present, load it up. If not, set default values.
-						if (config != null && config != undefined) {
-							iterations = config.iterations || iterations;
-							if (config.statusReporter) {
-								if (typeOf(config.statusReporter === 'function')) {
-									statusReporter = config.statusReporter;
-								} else {
-									throw 'InvalidArgumentException';		
-								}
-							}
+						if (typeOf(progressCallback) !== 'function') {
+							progressCallback = function(pct, msg) {};
 						}
 
 						// This is the "template" fleets - don't modify this
@@ -1095,10 +1340,11 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 
 						for (var party in {att:0,def:1}) {
 							fleets[party] = [];
+							var race = $('#' + party + '_race_selector option:selected').val();
 							for (var t in Enums.ShipTypes) {
 								count = parseInt($('#' + party + '_' + t + '_qty').val());
 								for (var i = 0; i < count; i++) {
-									var s = new Enums.ShipTypes[t].klass(currentBlueprints[party][t]);
+									var s = new Enums.ShipTypes[t].klass(currentBlueprints[party][t], race);
 									maxInitiative = Math.max(maxInitiative, s.initiative());
 									fleets[party].push(s);
 								}
@@ -1108,6 +1354,8 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 								return (b.modules.length - a.modules.length);
 							});
 						}
+
+						console.debug(fleets);
 
 						// Given an array of ships and an array of damage
 						// values, this function applies the damage to the
@@ -1235,72 +1483,92 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 
 						var parties = {att:'Attacker',def:'Defender'};
 						var wins = {att:{count:0},def:{count:0}};
+						var running = false;
+						var iterationsCompleted = 0;
 
-						for (var iter = 0; iter < iterations; iter++) {
-
-							var iterFleet = {};
-
-							// New combat - prepare fresh fleets
-							for (var p in parties) {
-								// TODO: This is not deep copying, probably
-								// Thus, ensure damages are removed from any ships
-								for (var i = 0; i < fleets[p].length; i++) {
-									fleets[p][i].damage = 0;
-								}
-								iterFleet[p] = $.extend(true, [], fleets[p]);
+						function runChunk() {
+							// Another chunk is already running - hold off till it's done
+							if (running) {
+								return;
 							}
-							var safety = 0; // in case of a draw
-							var round = 0;
-							var rolls = null;
-							// The safety is here in case of draws (missile fleets)
-							while (iterFleet.att.length > 0 && iterFleet.def.length > 0 && safety++ < 300) {
-								if (round++ == 0) {
-									// Deal with plasma missile combat; defender first
-									rolls = rollTheDice(iterFleet.def, Enums.ModuleTypes.missile);
-									removeCasualties(iterFleet.att, rolls);
+							running = true;
 
-									rolls = rollTheDice(iterFleet.att, Enums.ModuleTypes.missile);
-									removeCasualties(iterFleet.def, rolls);
+							for (var iter = 0; iter < config.chunkSize; iter++) {
+
+								var iterFleet = {};
+
+								// New combat - prepare fresh fleets
+								for (var p in parties) {
+									// TODO: This is not deep copying, probably
+									// Thus, ensure damages are removed from any ships
+									for (var i = 0; i < fleets[p].length; i++) {
+										fleets[p][i].damage = 0;
+									}
+									iterFleet[p] = $.extend(true, [], fleets[p]);
+								}
+								var safety = 0; // in case of a draw
+								var round = 0;
+								var rolls = null;
+								// The safety is here in case of draws (missile fleets)
+								while (iterFleet.att.length > 0 && iterFleet.def.length > 0 && safety++ < 300) {
+									if (round++ == 0) {
+										// Deal with plasma missile combat; defender first
+										rolls = rollTheDice(iterFleet.def, Enums.ModuleTypes.missile);
+										removeCasualties(iterFleet.att, rolls);
+
+										rolls = rollTheDice(iterFleet.att, Enums.ModuleTypes.missile);
+										removeCasualties(iterFleet.def, rolls);
+									}
+
+									for (var init = maxInitiative; init > -1; init--) {
+										// 1. Find ships having current initiative
+										function getShipsAtInitiative(party) {
+											return iterFleet[party].filter(function(x) { return x.initiative() == init; });
+										};
+
+										// 2. Defender rolls dice first
+										rolls = rollTheDice(getShipsAtInitiative('def'), Enums.ModuleTypes.cannon);
+										removeCasualties(iterFleet.att, rolls);
+
+										// 3. Attacker rolls with whatever's left
+										rolls = rollTheDice(getShipsAtInitiative('att'), Enums.ModuleTypes.cannon);
+										removeCasualties(iterFleet.def, rolls);
+
+
+									} // for each initiative level
+								} // while fleets exist
+
+								// This should never happen
+								// TODO: Correction - this can happen with two missile-equipped fleets
+								if (iterFleet.def.length == 0 && iterFleet.att.length == 0) {
+									throw 'BattleDrawException';
 								}
 
-								for (var init = maxInitiative; init > -1; init--) {
-									// 1. Find ships having current initiative
-									function getShipsAtInitiative(party) {
-										return iterFleet[party].filter(function(x) { return x.initiative() == init; });
-									};
-
-									// 2. Defender rolls dice first
-									rolls = rollTheDice(getShipsAtInitiative('def'), Enums.ModuleTypes.cannon);
-									removeCasualties(iterFleet.att, rolls);
-
-									// 3. Attacker rolls with whatever's left
-									rolls = rollTheDice(getShipsAtInitiative('att'), Enums.ModuleTypes.cannon);
-									removeCasualties(iterFleet.def, rolls);
+								var winningParty = (iterFleet.def.length == 0 ? 'att' : 'def');
 
 
-								} // for each initiative level
-							} // while fleets exist
-
-							// This should never happen
-							// TODO: Correction - this can happen with two missile-equipped fleets
-							if (iterFleet.def.length == 0 && iterFleet.att.length == 0) {
-								throw 'BattleDrawException';
+								// Defender lost
+								var formattedResult = formatWinResult(parties[winningParty], iterFleet[winningParty]);
+								if (!wins[winningParty][formattedResult]) {
+									wins[winningParty][formattedResult] = 1;
+								} else {
+									wins[winningParty][formattedResult]++;
+								}
+								wins[winningParty].count++;
 							}
 
-							var winningParty = (iterFleet.def.length == 0 ? 'att' : 'def');
-
-
-							// Defender lost
-							var formattedResult = formatWinResult(parties[winningParty], iterFleet[winningParty]);
-							if (!wins[winningParty][formattedResult]) {
-								wins[winningParty][formattedResult] = 1;
+							// Update the status reporter with iterations complete
+							iterationsCompleted += config.chunkSize;
+							if (iterationsCompleted >= config.iterations) {
+								_abortRun();
+								completedCallback(wins);
 							} else {
-								wins[winningParty][formattedResult]++;
+								progressCallback(iterationsCompleted / config.iterations);
 							}
-							wins[winningParty].count++;
-						}
+							running = false;
+						}; // runChunk;
 
-						return wins;
+						_runId = setInterval(runChunk, 100);
 					}, // run simulation
 
 					abort: function() {
@@ -1317,52 +1585,57 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 			// Startup
 			// ###########
 			$(document).ready(function() {
+
+				function resetResultPane() {
+					$('#result_pane').empty().append($('<p></p>').text('To the left, enter the number of ships participating in the battle, select the number of iterations to run, then click "Execute".'));
+				};
+
+				resetResultPane();
+
 				var parties = {'att':1, 'def':1};
 
 
-				for (var t in Enums.ShipTypes) {
-					if (Enums.ShipTypes[t].isAncient) {
-						continue;
-					}
-					for (party in parties) {
-						$('#'+party+'_blueprints').append(
-							$('<div></div>').addClass('ship_container ' + t)
-								.append(
-									new Enums.ShipTypes[t].klass(simulator.defaultBlueprints[party][t]).html()
-								)
-								
-						);
-					}
-				}
+
 
 				$('#btnRun').click(function() {
 					var iterations = parseInt($('#iteration_slider').slider('value'));
-					var result = simulator.run({iterations:iterations});
 
-					// Put the detailed results into order of probability, then write them out
-					var orderedResults = [];
-					for (var party in parties) {
-						for (var outcome in result[party]) {
-							if (outcome === 'count') {
-								continue;
+					function completedCallback(result) {
+
+						// Put the detailed results into order of probability, then write them out
+						var orderedResults = [];
+						for (var party in parties) {
+							for (var outcome in result[party]) {
+								if (outcome === 'count') {
+									continue;
+								}
+								orderedResults.push([result[party][outcome], outcome, party]);
 							}
-							orderedResults.push([result[party][outcome], outcome, party]);
 						}
-					}
-					orderedResults.sort(function(a,b) { return b[0] - a[0]; });
-					function pct(val, total) {
-						return (Math.round((val / total)	* 10000) / 100) + "%";
-					};
-					var ul = $('<ul></ul>');
-					for (var i = 0; i < orderedResults.length; i++) {
-						ul.append($('<li></li>').text(pct(orderedResults[i][0], iterations) + "  " + orderedResults[i][1] ).addClass(orderedResults[i][2]));
-					}
+						orderedResults.sort(function(a,b) { return b[0] - a[0]; });
+						function pct(val, total) {
+							return (Math.round((val / total)	* 10000) / 100) + "%";
+						};
+						var ul = $('<ul></ul>');
+						for (var i = 0; i < orderedResults.length; i++) {
+							ul.append($('<li></li>').text(pct(orderedResults[i][0], iterations) + "  " + orderedResults[i][1] ).addClass(orderedResults[i][2]));
+						}
 
-					$('#result_pane').empty()
-						.append(
-							$('<p></p>').text('Overall, the attacker wins ' + pct(result.att.count, iterations)+ ' and the defender wins ' + pct(result.def.count, iterations) + ' of the time.')
-						)
-						.append(ul);
+						$('#result_pane').empty()
+							.append(
+								$('<p></p>').text('Overall, the attacker wins ' + pct(result.att.count, iterations)+ ' and the defender wins ' + pct(result.def.count, iterations) + ' of the time.')
+							)
+							.append(ul);
+						$('#progress_bar').hide();
+					}; // completedCallback
+
+					function progressCallback(pct, msg) {
+						$('#progress_bar').show().progressbar('value', pct * 100);
+					};
+
+					$('#result_pane').empty().append($('<p></p>').text('Running simulation...')).append($('<input type="button"></input>').val('Cancel').click(function() {simulator.abort(); resetResultPane(); $('#progress_bar').hide(); }));
+					simulator.run({iterations:iterations}, progressCallback, completedCallback);
+
 				});
 
 				// Initialize module selector
@@ -1417,6 +1690,7 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 				headRow.append('<th></th>');
 				var tr = {};
 				var th = null;
+				console.debug(sorted);
 				for (var i = 0; i < sorted.length; i++) {
 					// skip ancients
 					if (Enums.ShipTypes[sorted[i][0]].isAncient) {
@@ -1430,7 +1704,10 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 						}
 						tr[party].append(
 							$('<td></td>').append(
-								qtyBox(party + '_' + sorted[i][0])
+								(party == 'att' && !(new sorted[i][1].klass(null, Enums.Races.Terran).isMobile) 
+									? null
+									: qtyBox(party + '_' + sorted[i][0])
+								)
 							)
 						);
 						
@@ -1447,10 +1724,47 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 				$('#ship_parts').tabs();
 				$('#iteration_slider').slider({
 					min:100,
-					max:5000,
-					step:200
+					max:20000,
+					step:500
 				});
 
+				$('#progress_bar').hide().progressbar({value:0});
+
+
+				// Initialize race selectors
+				for (var party in parties) {
+					var sel = $('#' + party + '_race_selector');
+					for (var race in Enums.Races) {
+						sel.append($('<option value="' + race + '"></option>').text(race));
+					}
+
+					// closure to preserve party
+					(function(p) {
+						sel.change(function() { 
+							rebuildBlueprints(p, $(this).find('option:selected').val());
+						});
+					})(party);
+				}
+
+				function rebuildBlueprints(party, race) {
+					var pb = $('#'+party+'_blueprints').empty();
+					for (var t in Enums.ShipTypes) {
+						if (Enums.ShipTypes[t].isAncient) {
+							continue;
+						}
+						pb.append(
+							$('<div></div>').addClass('ship_container ' + t)
+								.append(
+									new Enums.ShipTypes[t].klass(null, race).html()
+								)
+								
+						);
+					}					
+				};
+
+				for (var party in parties) {
+					rebuildBlueprints(party, $('#' + party + '_race_selector option:selected').val());
+				}
 			});
 		</script>
 
@@ -1571,6 +1885,11 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 				height: 180px;
 			}
 			#fleet_blueprints { float: left; }
+
+			#att_blueprints, #def_blueprints {
+				margin-top: -50px;
+			}
+
 			.module {
 				position:absolute;
 				width: 50px;
@@ -1593,16 +1912,17 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 				overflow: auto;
 				width: 100%;
 			}
-			div.slide_container {
+			div.jq_container {
 				position:relative;
 			}
 
 			.col_1 {
 				width: 200px;
+				margin-right: -200px;
 				float: left;
 			}
 			.col_2 {
-
+				margin: 0 30px 0 250px;
 			}
 			.clearing {
 				clear: both;
@@ -1782,6 +2102,24 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 				background-position: -13px -150px;
 			}
 
+			#fleet_blueprints { padding-left: 50px; }
+			
+			#fleet_blueprints h2 {
+				margin-top: 8px;
+				text-align: left;
+				float: left;
+				/*
+				float: left;
+				margin: 50px 0 -60px -50px;
+				*/
+			}
+			#att_race_selector,	#def_race_selector {
+				display: block;
+				clear: left;
+				position: relative;
+				z-index: 19;
+			}
+
 			
 
 			 /* jQuery UI Tabs 1.8.17
@@ -1865,23 +2203,6 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 			.ui-slider-vertical .ui-slider-range-min { bottom: 0; }
 			.ui-slider-vertical .ui-slider-range-max { top: 0; }
 
-			#fleet_blueprints { padding-left: 50px; }
-			#fleet_blueprints h2 {
-				-webkit-transform: rotate(-90deg);
-				-moz-transform: rotate(-90deg);
-				float: left;
-				margin: 50px 0 -60px -50px;
-			}
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1940,18 +2261,18 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 
 /* Component containers
 ----------------------------------*/
-.slide_container .ui-widget-content { border: 1px solid #dddddd; background: #eeeeee; color: #333333; }
-.slide_container .ui-widget-content a { color: #333333; }
+.jq_container .ui-widget-content { border: 1px solid #dddddd; background: #eeeeee; color: #333333; }
+.jq_container .ui-widget-content a { color: #333333; }
 
 /* Interaction states
 ----------------------------------*/
-.slide_container .ui-state-default, .slide_container .ui-widget-content .ui-state-default, .slide_container .ui-widget-header .ui-state-default { border: 1px solid #cccccc; background: #f6f6f6; font-weight: bold; color: #1c94c4; }
-.slide_container .ui-state-default a, .slide_container .ui-state-default a:link, .slide_container .ui-state-default a:visited { color: #1c94c4; text-decoration: none; }
-.slide_container .ui-state-hover, .slide_container .ui-widget-content .ui-state-hover, .slide_container .ui-widget-header .ui-state-hover, .slide_container .ui-state-focus, .slide_container .ui-widget-content .ui-state-focus, .slide_container .ui-widget-header .ui-state-focus { border: 1px solid #fbcb09; background: #fdf5ce; font-weight: bold; color: #c77405; }
-.slide_container .ui-state-hover a, .slide_container .ui-state-hover a:hover { color: #c77405; text-decoration: none; }
-.slide_container .ui-state-active, .slide_container .ui-widget-content .ui-state-active, .slide_container .ui-widget-header .ui-state-active { border: 1px solid #fbd850; background: #ffffff; font-weight: bold; color: #eb8f00; }
-.slide_container .ui-state-active a, .slide_container .ui-state-active a:link, .slide_container .ui-state-active a:visited { color: #eb8f00; text-decoration: none; }
-.slide_container .ui-widget :active { outline: none; }
+.jq_container .ui-state-default, .jq_container .ui-widget-content .ui-state-default, .jq_container .ui-widget-header .ui-state-default { border: 1px solid #cccccc; background: #f6f6f6; font-weight: bold; color: #1c94c4; }
+.jq_container .ui-state-default a, .jq_container .ui-state-default a:link, .jq_container .ui-state-default a:visited { color: #1c94c4; text-decoration: none; }
+.jq_container .ui-state-hover, .jq_container .ui-widget-content .ui-state-hover, .jq_container .ui-widget-header .ui-state-hover, .jq_container .ui-state-focus, .jq_container .ui-widget-content .ui-state-focus, .jq_container .ui-widget-header .ui-state-focus { border: 1px solid #fbcb09; background: #fdf5ce; font-weight: bold; color: #c77405; }
+.jq_container .ui-state-hover a, .jq_container .ui-state-hover a:hover { color: #c77405; text-decoration: none; }
+.jq_container .ui-state-active, .jq_container .ui-widget-content .ui-state-active, .jq_container .ui-widget-header .ui-state-active { border: 1px solid #fbd850; background: #ffffff; font-weight: bold; color: #eb8f00; }
+.jq_container .ui-state-active a, .jq_container .ui-state-active a:link, .jq_container .ui-state-active a:visited { color: #eb8f00; text-decoration: none; }
+.jq_container .ui-widget :active { outline: none; }
 
 
 /* Misc visuals
@@ -1963,6 +2284,24 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 .ui-corner-all, .ui-corner-bottom, .ui-corner-left, .ui-corner-bl { -moz-border-radius-bottomleft: 4px; -webkit-border-bottom-left-radius: 4px; -khtml-border-bottom-left-radius: 4px; border-bottom-left-radius: 4px; }
 .ui-corner-all, .ui-corner-bottom, .ui-corner-right, .ui-corner-br { -moz-border-radius-bottomright: 4px; -webkit-border-bottom-right-radius: 4px; -khtml-border-bottom-right-radius: 4px; border-bottom-right-radius: 4px; }
 
+
+/*
+ * jQuery UI Progressbar 1.8.17
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Progressbar#theming
+ */
+.ui-progressbar { height:22px; text-align: left; overflow: hidden; }
+.ui-progressbar .ui-progressbar-value {
+	margin: -1px; 
+	height:100%; 
+	background-image: url(data:image/gif;base64,R0lGODlhMAAWAPMPAO+cSvfOlPfFlO/FjP+9c/+1c/e1a/+tUu+ta++tY/+lSvelQvelSu+cQv/WnAAAACH/C05FVFNDQVBFMi4wAwEAAAAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh/wtYTVAgRGF0YVhNUIAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/PgAh+QQFBwAPACwAAAAAMAAWAAAErHDISauVwenNu9cCIo5kaSIGoa5s66rGKZ/pa78xkux87/u1mxD2KxoTweHNcGzykkqc0wmNtpjTY9W6wmaLhoJ4TC6bxd4v8Mxmp9XPtpz89gHu+Pydcej7/4CBfQx6hYZ5fIKKgoSHjoiLkX+Nj48MCpiZmpucmJSVh5edo52flQ2oqQ2ipK2eqrCxsqyupAuyuLO1rre5vqi0u5y9v7kLwrbFvsfIncTKsBEAIfkEBQcADwAsAAAAADAA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); 
+
+}
+
 		</style>
 
 	</head>
@@ -1972,6 +2311,9 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 
 			<section id='fleet_blueprints'>
 				<h2 class='att_lt'>Attacker</h2>
+				<select id='att_race_selector'>
+				</select>
+
 				<div id='att_blueprints' class='container'>
 
 				</div>
@@ -2004,7 +2346,7 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 							</table>
 
 							<h3>Simulation Options</h3>
-							<div class='slide_container'>
+							<div class='jq_container'>
 								<span class='slider_label_left'>Faster</span>
 								<span class='slider_label_right'>More accurate</span>
 								<div class='clearing'></div>
@@ -2018,8 +2360,11 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 
 						<div class='col_2'>
 							<h3>Simulation Results</h3>
+							<div class='jq_container'>
+								<div id='progress_bar'></div>
+							</div>
 							<div id='result_pane'>
-								<p>To the left, enter the number of ships participating in the battle, select the number of iterations to run, then click "Execute".</p>
+								
 							</div>
 						</div>
 
@@ -2028,6 +2373,7 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 				</div>
 
 				<h2 class='def_lt'>Defender</h2>
+				<select id='def_race_selector'></select>
 				<div id='def_blueprints' class='container'>
 
 				</div>
