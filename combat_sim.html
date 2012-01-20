@@ -2,6 +2,8 @@
 <html>
 	<head>
 
+		<title>Eclipse Combat Simulator</title>
+
 		<script type='text/javascript'>
 
 
@@ -1355,7 +1357,6 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 							});
 						}
 
-						console.debug(fleets);
 
 						// Given an array of ships and an array of damage
 						// values, this function applies the damage to the
@@ -1690,7 +1691,6 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 				headRow.append('<th></th>');
 				var tr = {};
 				var th = null;
-				console.debug(sorted);
 				for (var i = 0; i < sorted.length; i++) {
 					// skip ancients
 					if (Enums.ShipTypes[sorted[i][0]].isAncient) {
@@ -1699,7 +1699,7 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 					headRow.append($('<th></th>').addClass('ship_types ship_' + sorted[i][0]).css({width:24,height:24})); //.text(sorted[i][0][0]));
 					for (var party in parties) {
 						if (!tr[party]) {
-							tr[party] = $('<tr></tr>').append($('<td>'+party+'</td>').addClass(party));
+							tr[party] = $('<tr></tr>').append($('<th style="text-transform:capitalize">'+party+'.</th>').addClass(party));
 							tbody.append(tr[party]);
 						}
 						tr[party].append(
@@ -1723,9 +1723,10 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 				// Set up the tabs
 				$('#ship_parts').tabs();
 				$('#iteration_slider').slider({
+					value:2000,
 					min:100,
-					max:20000,
-					step:500
+					max:10000,
+					step:200
 				});
 
 				$('#progress_bar').hide().progressbar({value:0});
@@ -1868,8 +1869,16 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 				text-align: center;
 			}
 			h1 {
-				font-size: 38px;
+				font-size: 32px;
 				font-variant: uppercase;
+			}
+			h3 {
+				font-size: 18px;
+				margin: 5px;
+				border-bottom: 1px solid #999;
+			}
+			h2 {
+				font-size: 20px;
 			}
 
 			ul {
@@ -1882,12 +1891,12 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 			}
 			.blueprint {
 				width: 150px;
-				height: 180px;
+				height: 150px;
 			}
 			#fleet_blueprints { float: left; }
 
 			#att_blueprints, #def_blueprints {
-				margin-top: -50px;
+				margin-top: -55px;
 			}
 
 			.module {
@@ -1942,10 +1951,15 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 			}
 
 			#fleet_composition {
-
+				margin: 5px 0 15px;
 			}
 			td {
 				margin: 3px;
+			}
+			tr th {
+				padding: 3px;
+				font-size: 14px;
+				font-family: OrbitronBold;
 			}
 			input {
 				font: 14px NobileRegular;
@@ -2261,7 +2275,7 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 
 /* Component containers
 ----------------------------------*/
-.jq_container .ui-widget-content { border: 1px solid #dddddd; background: #eeeeee; color: #333333; }
+.jq_container .ui-widget-content { border: 1px solid #666; background: #999; color: #333333; }
 .jq_container .ui-widget-content a { color: #333333; }
 
 /* Interaction states
