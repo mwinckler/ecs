@@ -568,7 +568,7 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 					ImprovedHull: Module.extend({
 						init: function() {
 							this._super();
-							this.hull = 1;
+							this.hull = 2;
 						},
 						klassName:'ImprovedHull',
 						moduleName:'Improved Hull'
@@ -951,7 +951,7 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 					startingEnergy: 0,
 					startingInitiative: 0,
 					isMobile: true, // true for all starships, false for starbase
-					
+
 					// Checks the configured layout to see if it is allowable.
 					// This function returns an array of strings representing
 					// error messages; if the array is empty then the layout
@@ -985,8 +985,43 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 						return errors;
 					},
 
-					// Generates HTML to display the current ship module layout
+					/// Generates HTML to display the current ship module layout
+					/// Note: Calling this function associates the generated HTML
+					///	with this ship object instance (i.e. dropping modules onto
+					///	the HTML will update this instance's blueprints/modules).
 					html: function() {
+						var ret = $('<div></div>').addClass('blueprint');
+
+						var shipInstance = this;
+
+						/// This function relies on this.modules array being up-to-date.
+						/// It will return an empty div if we're set as readonly.
+						function getStatsDiv() {
+							var sdiv = $('<div></div>').addClass('stats')
+										.append($('<span></span>').addClass('hull').text(shipInstance.hull()));
+							var comps = shipInstance.computers();
+							var shlds = shipInstance.shields();
+							if (comps > 0) {
+								sdiv.append($('<span></span>').addClass('computers').text('+' + comps));
+							}
+							if (shlds > 0) {
+								sdiv.append($('<span></span>').addClass('shields').text('-' + shlds));
+							}
+							return sdiv;
+						};
+
+						/// Designed to be called on drag or drop to
+						/// update the modules associated with this ship
+						/// instance so that we can accurately reflect stats.
+						/// This updates the shipInstance's modules array in place.
+						function recalculateBlueprints() {
+							shipInstance.modules = [];
+							ret.find('.module').each(function(i, mod) {
+								var c = $(mod).data('moduleKlass');
+								shipInstance.modules.push(new c());
+							});
+						};
+
 						function dragify(el, cssClasses) {
 							return $(el).draggable({
 								containment:'window',
@@ -1007,7 +1042,8 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 								},
 								stop: function(event, ui) {
 									$(this).remove();
-
+									recalculateBlueprints();
+									ret.find('div.stats').replaceWith(getStatsDiv());
 								}
 							}).removeAttr('style'); // draggable tacks on positioning we don't want
 						};
@@ -1028,18 +1064,18 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 												),
 												cssClasses
 											);				
-											// TODO: newModule needs to be a
-											// draggable that restores the
-											// default module to its slot
-											// whenever it's dropped outside
-											// the ship.
+											// TODO: it'd be nice if newModule
+											// restored the default (printed) module
+											// when it gets dragged out of the ship.
 
 											$(this).remove();
+
+											recalculateBlueprints();
+											ret.find('div.stats').replaceWith(getStatsDiv());
 										}
 									});
 						};
 
-						var ret = $('<div></div>').addClass('blueprint');
 						var classes = '';
 
 						for (var i = 0; i < this.layout.length; i++) {
@@ -1055,6 +1091,8 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 								classes
 							));
 						}
+
+						ret.append(getStatsDiv());
 
 						return ret;
 					},
@@ -1413,6 +1451,8 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 								for (var j = ships.length - 1; j > -1; j--) {
 									if (isHit(roll, ships[j])) {
 										ships[j].damage += roll.damage;
+										console.debug('applying damage');
+										console.debug(ships[j], roll);
 									}
 								}
 
@@ -1487,6 +1527,20 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 						var running = false;
 						var iterationsCompleted = 0;
 
+						// This stores _potential_ damage, not damage assigned.
+						// Assumes no shields on target.
+						var potentialDamageByRound = {
+							att:[],
+							def:[]
+						};
+
+						/// Assumes no shields on target
+						function sumPotentialDamage(rolls) {
+							var d = 0;
+							$(rolls).each(function(i,r) { d += (r.roll + r.computerBonus >= 6 ? r.damage : 0); });
+							return d;
+						};						
+
 						function runChunk() {
 							// Another chunk is already running - hold off till it's done
 							if (running) {
@@ -1510,15 +1564,27 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 								var safety = 0; // in case of a draw
 								var round = 0;
 								var rolls = null;
+
+
 								// The safety is here in case of draws (missile fleets)
 								while (iterFleet.att.length > 0 && iterFleet.def.length > 0 && safety++ < 300) {
-									if (round++ == 0) {
-										// Deal with plasma missile combat; defender first
-										rolls = rollTheDice(iterFleet.def, Enums.ModuleTypes.missile);
-										removeCasualties(iterFleet.att, rolls);
+									for (var p in parties) {
+										potentialDamageByRound[p][round] = [];
+									}
+									var roundDmg = {att:0,def:0};
+									if (round == 0) {
+										// Deal with plasma missile combat in initiative order
+										for (var init = maxInitiative; init > -1; init--) {
+											rolls = rollTheDice(getShipsAtInitiative('def'), Enums.ModuleTypes.missile);
+											roundDmg.def += sumPotentialDamage(rolls);
+											removeCasualties(iterFleet.att, rolls);
 
-										rolls = rollTheDice(iterFleet.att, Enums.ModuleTypes.missile);
-										removeCasualties(iterFleet.def, rolls);
+											rolls = rollTheDice(getShipsAtInitiative('att'), Enums.ModuleTypes.missile);
+											roundDmg.att += sumPotentialDamage(rolls);
+											removeCasualties(iterFleet.def, rolls);
+										}
+										round++;
+										continue;
 									}
 
 									for (var init = maxInitiative; init > -1; init--) {
@@ -1529,14 +1595,20 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 
 										// 2. Defender rolls dice first
 										rolls = rollTheDice(getShipsAtInitiative('def'), Enums.ModuleTypes.cannon);
+										roundDmg.def += sumPotentialDamage(rolls);
 										removeCasualties(iterFleet.att, rolls);
 
 										// 3. Attacker rolls with whatever's left
 										rolls = rollTheDice(getShipsAtInitiative('att'), Enums.ModuleTypes.cannon);
+										roundDmg.att += sumPotentialDamage(rolls);
 										removeCasualties(iterFleet.def, rolls);
 
 
 									} // for each initiative level
+									potentialDamageByRound.att[round].push(roundDmg.att);
+									potentialDamageByRound.def[round].push(roundDmg.def);
+
+									round++;
 								} // while fleets exist
 
 								// This should never happen
@@ -1563,9 +1635,11 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 							if (iterationsCompleted >= config.iterations) {
 								_abortRun();
 								completedCallback(wins);
+								console.debug(potentialDamageByRound);
 							} else {
 								progressCallback(iterationsCompleted / config.iterations);
 							}
+
 							running = false;
 						}; // runChunk;
 
@@ -1891,7 +1965,7 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 			}
 			.blueprint {
 				width: 150px;
-				height: 150px;
+				height: 180px;
 			}
 			#fleet_blueprints { float: left; }
 
@@ -1948,6 +2022,37 @@ a.options.refreshPositions||d.ui.ddmanager.prepareOffsets(a,b)}}})(jQuery);
 				display: block;
 				margin: 0 auto;
 				font-size: 16px;
+			}
+
+			.stats {
+				position: absolute;
+				bottom: 0;
+				width: 100%;
+				overflow: auto;
+				font-size: 16px;
+				font-weight: bold;
+				text-align: center;
+			}
+			.stats span {
+				display: block;
+				float: left;
+				margin: 0 5px;
+			}
+			.stats .computers {
+				background: #fff;
+				color: #000;
+				border-radius: 5px;
+				height: 24px;
+				width: 24px;
+			}
+			.stats .shields {
+				background: #000;
+				border: 1px solid #666;
+				border-radius: 5px;
+				height: 24px;
+				width: 24px;
+				color: #fff;
+				text-shadow: 2px 2px 2px #444;
 			}
 
 			#fleet_composition {
